@@ -1,0 +1,28 @@
+# Secrets — never commit real keys
+.env
+*.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules
+
+# Build output
+dist
+
+# Local Netlify folder
+.netlify
+
+# Read-only Stripe inspection output (contains customer data)
+inspect-output
+
+# Test artifacts
+test-results
+playwright-report
+
+# Editor / OS cruft
+.idea
+.vscode
+.DS_Store
+deno.lock
+firebase-debug.log

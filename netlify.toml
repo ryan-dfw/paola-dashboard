@@ -1,0 +1,44 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "22"
+  # The VITE_FIREBASE_* web config is meant to be in the browser bundle
+  # (Firebase web config is public by design — security comes from the
+  # server-side token check + allowlist). FIREBASE_PROJECT_ID is the same
+  # public value. Tell Netlify's secrets scanner not to fail the build on them.
+  # STRIPE_SECRET_KEY / FIREBASE_PRIVATE_KEY are NOT in this list: if either
+  # ever showed up in the build output, the build should fail.
+  SECRETS_SCAN_OMIT_KEYS = "VITE_FIREBASE_API_KEY,VITE_FIREBASE_AUTH_DOMAIN,VITE_FIREBASE_PROJECT_ID,VITE_FIREBASE_APP_ID,FIREBASE_PROJECT_ID"
+
+[functions]
+  node_bundler = "esbuild"
+  # stripe's CommonJS build does dynamic require()s of Node built-ins that
+  # don't survive bundling into ESM; ship it as a normal node_modules package.
+  # (jose — used for Firebase token checks — is ESM and bundles cleanly.)
+  external_node_modules = ["stripe"]
+
+[dev]
+  command = "npm run dev"
+  targetPort = 5174
+  port = 8889
+  publish = "dist"
+  functions = "netlify/functions"
+  autoLaunch = false
+
+# Single-page app: every non-API path serves the app shell.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "no-referrer"
+    X-Content-Type-Options = "nosniff"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
